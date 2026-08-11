@@ -17,8 +17,13 @@
 /.next/
 /out/
 
+/.agents
+/.claude
+
 # production
 /build
+
+/context/ui-imgs
 
 # misc
 .DS_Store

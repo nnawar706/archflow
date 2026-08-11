@@ -1,9 +1,5 @@
-import { EditorShell } from "@/components/editor-shell";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <EditorShell>
-      <p className="text-sm text-copy-muted">Canvas placeholder</p>
-    </EditorShell>
-  );
+  redirect("/editor");
 }
