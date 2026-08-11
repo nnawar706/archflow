@@ -7,7 +7,9 @@ import { CanvasPlaceholder } from "@/components/canvas-placeholder"
 import { EditorNavbar } from "@/components/editor-navbar"
 import { ProjectDialog } from "@/components/project-dialog"
 import { ProjectSidebar } from "@/components/sidebar"
+import { ShareDialog } from "@/components/share-dialog"
 import { useProjectActions } from "@/hooks/use-project-actions"
+import { useShareDialog } from "@/hooks/use-share-dialog"
 import type { Project } from "@/types/project"
 
 interface WorkspaceShellProps {
@@ -37,6 +39,23 @@ export function WorkspaceShell({
     closeDialog,
     submit,
   } = useProjectActions()
+  const {
+    isOpen: isShareDialogOpen,
+    openDialog: openShareDialog,
+    closeDialog: closeShareDialog,
+    collaborators,
+    isOwner,
+    isLoadingList,
+    emailInput,
+    setEmailInput,
+    isInviting,
+    removingId,
+    error: shareError,
+    copied,
+    invite,
+    remove,
+    copyLink,
+  } = useShareDialog(project.id)
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-base">
@@ -47,6 +66,7 @@ export function WorkspaceShell({
         showWorkspaceActions
         isAiSidebarOpen={isAiSidebarOpen}
         onToggleAiSidebar={() => setIsAiSidebarOpen((open) => !open)}
+        onShare={openShareDialog}
       />
 
       <div className="relative flex flex-1 overflow-hidden">
@@ -82,6 +102,23 @@ export function WorkspaceShell({
         isLoading={isLoading}
         error={error}
         onSubmit={submit}
+      />
+
+      <ShareDialog
+        open={isShareDialogOpen}
+        onOpenChange={(open) => !open && closeShareDialog()}
+        collaborators={collaborators}
+        isOwner={isOwner}
+        isLoadingList={isLoadingList}
+        emailInput={emailInput}
+        onEmailInputChange={setEmailInput}
+        isInviting={isInviting}
+        removingId={removingId}
+        error={shareError}
+        copied={copied}
+        onInvite={invite}
+        onRemove={remove}
+        onCopyLink={copyLink}
       />
     </div>
   )

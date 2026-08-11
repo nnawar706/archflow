@@ -1,5 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
+import { NextResponse } from "next/server"
 
+import { errorResponse } from "@/lib/project-api"
 import { prisma } from "@/lib/prisma"
 import type { Project, ProjectCollaborator } from "@/app/generated/prisma/client"
 
@@ -50,4 +52,22 @@ export async function getAccessibleProject(
   }
 
   return project
+}
+
+/** Fetches a project and returns it only if `userId` owns it; otherwise a ready-to-return error response. */
+export async function requireProjectOwner(
+  projectId: string,
+  userId: string
+): Promise<{ project: Project } | { error: NextResponse }> {
+  const project = await prisma.project.findUnique({ where: { id: projectId } })
+
+  if (!project) {
+    return { error: errorResponse(404, "Project not found") }
+  }
+
+  if (project.ownerId !== userId) {
+    return { error: errorResponse(403, "Forbidden") }
+  }
+
+  return { project }
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { Pencil, Plus, Trash2, X } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -46,9 +47,10 @@ function ProjectRow({
         isActive ? "bg-accent-dim" : "hover:bg-subtle"
       )}
     >
-      <span
+      <Link
+        href={`/editor/${project.id}`}
         className={cn(
-          "flex min-w-0 items-center gap-2 truncate text-sm",
+          "flex min-w-0 flex-1 items-center gap-2 truncate text-sm",
           isActive ? "text-brand" : "text-copy-primary"
         )}
       >
@@ -56,7 +58,7 @@ function ProjectRow({
           <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-brand" />
         ) : null}
         <span className="truncate">{project.name}</span>
-      </span>
+      </Link>
 
       {canManage ? (
         <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">

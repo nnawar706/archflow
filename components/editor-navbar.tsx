@@ -12,6 +12,7 @@ interface EditorNavbarProps {
   showWorkspaceActions?: boolean
   isAiSidebarOpen?: boolean
   onToggleAiSidebar?: () => void
+  onShare?: () => void
 }
 
 export function EditorNavbar({
@@ -21,6 +22,7 @@ export function EditorNavbar({
   showWorkspaceActions = false,
   isAiSidebarOpen = false,
   onToggleAiSidebar,
+  onShare,
 }: EditorNavbarProps) {
   return (
     <header className="flex h-14 w-full shrink-0 items-center gap-3 border-b border-surface-border bg-surface px-3">
@@ -50,7 +52,7 @@ export function EditorNavbar({
       <div className="flex items-center gap-2">
         {showWorkspaceActions ? (
           <>
-            <Button variant="outline" size="sm" aria-label="Share project">
+            <Button variant="outline" size="sm" onClick={onShare} aria-label="Share project">
               <Share2 className="size-4" />
               Share
             </Button>
