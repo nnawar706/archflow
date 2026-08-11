@@ -12,6 +12,7 @@ interface ProjectSidebarProps {
   onClose: () => void
   ownedProjects: Project[]
   sharedProjects: Project[]
+  activeProjectId?: string
   onCreate: () => void
   onRename: (project: Project) => void
   onDelete: (project: Project) => void
@@ -28,17 +29,34 @@ function EmptyPlaceholder({ label }: { label: string }) {
 function ProjectRow({
   project,
   canManage,
+  isActive,
   onRename,
   onDelete,
 }: {
   project: Project
   canManage: boolean
+  isActive: boolean
   onRename: (project: Project) => void
   onDelete: (project: Project) => void
 }) {
   return (
-    <div className="group flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 hover:bg-subtle">
-      <span className="truncate text-sm text-copy-primary">{project.name}</span>
+    <div
+      className={cn(
+        "group flex items-center justify-between gap-2 rounded-xl px-2.5 py-2",
+        isActive ? "bg-accent-dim" : "hover:bg-subtle"
+      )}
+    >
+      <span
+        className={cn(
+          "flex min-w-0 items-center gap-2 truncate text-sm",
+          isActive ? "text-brand" : "text-copy-primary"
+        )}
+      >
+        {isActive ? (
+          <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-brand" />
+        ) : null}
+        <span className="truncate">{project.name}</span>
+      </span>
 
       {canManage ? (
         <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
@@ -68,12 +86,14 @@ function ProjectList({
   projects,
   emptyLabel,
   canManage,
+  activeProjectId,
   onRename,
   onDelete,
 }: {
   projects: Project[]
   emptyLabel: string
   canManage: boolean
+  activeProjectId?: string
   onRename: (project: Project) => void
   onDelete: (project: Project) => void
 }) {
@@ -88,6 +108,7 @@ function ProjectList({
           key={project.id}
           project={project}
           canManage={canManage}
+          isActive={project.id === activeProjectId}
           onRename={onRename}
           onDelete={onDelete}
         />
@@ -101,6 +122,7 @@ export function ProjectSidebar({
   onClose,
   ownedProjects,
   sharedProjects,
+  activeProjectId,
   onCreate,
   onRename,
   onDelete,
@@ -152,6 +174,7 @@ export function ProjectSidebar({
               projects={ownedProjects}
               emptyLabel="No projects yet"
               canManage
+              activeProjectId={activeProjectId}
               onRename={onRename}
               onDelete={onDelete}
             />
@@ -162,6 +185,7 @@ export function ProjectSidebar({
               projects={sharedProjects}
               emptyLabel="No shared projects yet"
               canManage={false}
+              activeProjectId={activeProjectId}
               onRename={onRename}
               onDelete={onDelete}
             />
