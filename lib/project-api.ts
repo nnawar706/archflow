@@ -18,3 +18,24 @@ export function parseProjectName(body: unknown): string | null {
   const trimmed = name.trim()
   return trimmed.length > 0 ? trimmed : null
 }
+
+const PROJECT_ID_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,60}[a-z0-9])?$/
+
+type ParsedProjectId = { ok: true; id: string | undefined } | { ok: false }
+
+/**
+ * Extracts an optional client-supplied `id` field from an unknown request body.
+ * Used so a project's ID can be set to match its Liveblocks room ID at creation time.
+ */
+export function parseOptionalProjectId(body: unknown): ParsedProjectId {
+  if (typeof body !== "object" || body === null || !("id" in body)) {
+    return { ok: true, id: undefined }
+  }
+
+  const { id } = body as { id: unknown }
+  if (typeof id !== "string" || !PROJECT_ID_PATTERN.test(id)) {
+    return { ok: false }
+  }
+
+  return { ok: true, id }
+}

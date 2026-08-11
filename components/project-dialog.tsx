@@ -17,6 +17,7 @@ interface ProjectDialogProps {
   slugPreview: string
   targetName: string
   isLoading: boolean
+  error?: string | null
   onSubmit: () => void
 }
 
@@ -50,6 +51,7 @@ export function ProjectDialog({
   slugPreview,
   targetName,
   isLoading,
+  error,
   onSubmit,
 }: ProjectDialogProps) {
   if (!mode) return null
@@ -125,6 +127,7 @@ export function ProjectDialog({
           ) : null}
         </form>
       ) : null}
+      {error ? <p className="text-xs text-error">{error}</p> : null}
     </BaseDialog>
   )
 }

@@ -1,7 +1,11 @@
 import { auth } from "@clerk/nextjs/server"
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { errorResponse, parseProjectName } from "@/lib/project-api"
+import {
+  errorResponse,
+  parseOptionalProjectId,
+  parseProjectName,
+} from "@/lib/project-api"
 
 export async function GET() {
   const { userId } = await auth()
@@ -26,8 +30,17 @@ export async function POST(request: NextRequest) {
   const body: unknown = await request.json().catch(() => null)
   const name = parseProjectName(body) ?? "Untitled Project"
 
+  const idResult = parseOptionalProjectId(body)
+  if (!idResult.ok) {
+    return errorResponse(400, "Invalid project id")
+  }
+
   const project = await prisma.project.create({
-    data: { ownerId: userId, name },
+    data: {
+      ownerId: userId,
+      name,
+      ...(idResult.id ? { id: idResult.id } : {}),
+    },
   })
 
   return NextResponse.json({ project }, { status: 201 })
