@@ -18,6 +18,7 @@
 - `trigger` — Long-running background jobs: AI design generation and spec generation.
 - `lib` — Shared infrastructure: Prisma client, access control helpers, and utilities.
 - `components` — UI composition: canvas surfaces, sidebars, dialogs, and interactive elements.
+- `hooks` — client-side React hooks that own UI/form/dialog state so `components` stays presentation-only.
 - `prisma` — Database schema and generated client output.
 - `data` — Legacy local directory. Not used for new artifacts.
 

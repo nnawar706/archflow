@@ -32,7 +32,9 @@ export function BaseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-3xl border border-surface-border bg-elevated text-copy-primary">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-copy-primary">
+            {title}
+          </DialogTitle>
           {description ? (
             <DialogDescription className="text-copy-muted">
               {description}
