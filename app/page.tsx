@@ -1,3 +1,9 @@
+import { EditorShell } from "@/components/editor-shell";
+
 export default function Home() {
-  return <div>ARCH-FLOW</div>;
+  return (
+    <EditorShell>
+      <p className="text-sm text-copy-muted">Canvas placeholder</p>
+    </EditorShell>
+  );
 }
