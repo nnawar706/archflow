@@ -14,6 +14,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react"
 
+import { CanvasControls } from "@/components/canvas-controls"
 import { CanvasEdgeRenderer } from "@/components/canvas-edge"
 import { CanvasNodeRenderer } from "@/components/canvas-node"
 import { ShapePanel } from "@/components/shape-panel"
@@ -144,6 +145,9 @@ export function CanvasFlow({ isAiSidebarOpen }: CanvasFlowProps) {
         nodeColor="var(--text-faint)"
         nodeStrokeColor="var(--border-subtle)"
       />
+      <Panel position="bottom-left">
+        <CanvasControls />
+      </Panel>
       <Panel position="bottom-center">
         <ShapePanel />
       </Panel>
