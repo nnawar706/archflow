@@ -6,16 +6,26 @@ import {
   Background,
   BackgroundVariant,
   ConnectionMode,
+  MarkerType,
   MiniMap,
   Panel,
   ReactFlow,
+  type DefaultEdgeOptions,
   type ReactFlowInstance,
 } from "@xyflow/react"
 
+import { CanvasEdgeRenderer } from "@/components/canvas-edge"
 import { CanvasNodeRenderer } from "@/components/canvas-node"
 import { ShapePanel } from "@/components/shape-panel"
 import { SHAPE_DRAG_MIME_TYPE, parseShapeDragPayload } from "@/lib/shape-drag"
-import { DEFAULT_NODE_COLOR, type CanvasEdge, type CanvasNode, type NodeShape } from "@/types/canvas"
+import {
+  DEFAULT_EDGE_COLOR,
+  DEFAULT_NODE_COLOR,
+  DEFAULT_NODE_TEXT_COLOR,
+  type CanvasEdge,
+  type CanvasNode,
+  type NodeShape,
+} from "@/types/canvas"
 
 interface CanvasFlowProps {
   isAiSidebarOpen?: boolean
@@ -26,6 +36,13 @@ interface CanvasFlowProps {
 const AI_SIDEBAR_MINIMAP_OFFSET = "336px"
 
 const nodeTypes = { canvasNode: CanvasNodeRenderer }
+const edgeTypes = { canvasEdge: CanvasEdgeRenderer }
+
+// New connections use the custom canvas edge type and get an arrowhead by default.
+const defaultEdgeOptions: DefaultEdgeOptions = {
+  type: "canvasEdge",
+  markerEnd: { type: MarkerType.ArrowClosed, color: DEFAULT_EDGE_COLOR, width: 18, height: 18 },
+}
 
 let nodeIdCounter = 0
 
@@ -86,6 +103,7 @@ export function CanvasFlow({ isAiSidebarOpen }: CanvasFlowProps) {
         data: {
           label: "",
           color: DEFAULT_NODE_COLOR,
+          textColor: DEFAULT_NODE_TEXT_COLOR,
           shape: payload.shape,
         },
       }
@@ -100,6 +118,8 @@ export function CanvasFlow({ isAiSidebarOpen }: CanvasFlowProps) {
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+      defaultEdgeOptions={defaultEdgeOptions}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
