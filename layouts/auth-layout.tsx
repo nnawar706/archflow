@@ -1,22 +1,5 @@
+import { FEATURES } from "@/constants"
 import type { ReactNode } from "react"
-
-const FEATURES = [
-  {
-    title: "AI Architecture Generation",
-    description:
-      "Describe your system, AI maps it to nodes and edges on a live canvas.",
-  },
-  {
-    title: "Real-time Collaboration",
-    description:
-      "Live cursors, presence indicators, and shared node editing across your team.",
-  },
-  {
-    title: "Instant Spec Generation",
-    description:
-      "Export a complete Markdown technical spec directly from the canvas graph.",
-  },
-]
 
 interface AuthLayoutProps {
   children: ReactNode

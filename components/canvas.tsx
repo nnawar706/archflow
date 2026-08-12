@@ -5,21 +5,23 @@ import { AlertTriangle, Loader2 } from "lucide-react"
 import { ErrorBoundary } from "react-error-boundary"
 
 import { CanvasFlow } from "@/components/canvas-flow"
+import type { PendingTemplateImport } from "@/components/starter-templates"
 
 import "@xyflow/react/dist/style.css"
 
 interface CanvasProps {
   roomId: string
   isAiSidebarOpen?: boolean
+  pendingTemplate?: PendingTemplateImport | null
 }
 
-export function Canvas({ roomId, isAiSidebarOpen }: CanvasProps) {
+export function Canvas({ roomId, isAiSidebarOpen, pendingTemplate }: CanvasProps) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
       <RoomProvider id={roomId} initialPresence={{ cursor: null, isThinking: false }}>
         <ErrorBoundary fallback={<CanvasErrorFallback />}>
           <ClientSideSuspense fallback={<CanvasLoadingFallback />}>
-            <CanvasFlow isAiSidebarOpen={isAiSidebarOpen} />
+            <CanvasFlow isAiSidebarOpen={isAiSidebarOpen} pendingTemplate={pendingTemplate} />
           </ClientSideSuspense>
         </ErrorBoundary>
       </RoomProvider>

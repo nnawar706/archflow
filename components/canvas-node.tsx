@@ -6,17 +6,7 @@ import { Handle, NodeResizer, Position, useReactFlow, type NodeProps } from "@xy
 import { NodeColorToolbar } from "@/components/node-color-toolbar"
 import { NodeShapeVisual } from "@/components/node-shape"
 import { MIN_NODE_HEIGHT, MIN_NODE_WIDTH, type CanvasNode } from "@/types/canvas"
-
-// Small white dot with a dark border, hidden at rest and faded in on node
-// hover via the `.arch-flow-handle` rule in globals.css (opacity can't live
-// here since it needs to react to a CSS :hover state).
-const HANDLE_STYLE = {
-  width: 8,
-  height: 8,
-  borderRadius: 9999,
-  backgroundColor: "var(--text-primary)",
-  border: "1.5px solid var(--bg-base)",
-}
+import { HANDLE_STYLE } from "@/constants"
 
 const HANDLE_POSITIONS = [Position.Top, Position.Right, Position.Bottom, Position.Left]
 

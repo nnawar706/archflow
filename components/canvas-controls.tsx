@@ -6,8 +6,7 @@ import { Maximize, Minus, Plus, Redo2, Undo2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts"
-
-const ZOOM_ANIMATION = { duration: 200 }
+import { ZOOM_ANIMATION } from "@/constants"
 
 export function CanvasControls() {
   const reactFlowInstance = useReactFlow()

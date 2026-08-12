@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useRef, type DragEvent } from "react"
+import { useCallback, useEffect, useRef, type DragEvent } from "react"
 import { useLiveblocksFlow } from "@liveblocks/react-flow"
 import {
   Background,
@@ -18,6 +18,7 @@ import { CanvasControls } from "@/components/canvas-controls"
 import { CanvasEdgeRenderer } from "@/components/canvas-edge"
 import { CanvasNodeRenderer } from "@/components/canvas-node"
 import { ShapePanel } from "@/components/shape-panel"
+import type { PendingTemplateImport } from "@/components/starter-templates"
 import { SHAPE_DRAG_MIME_TYPE, parseShapeDragPayload } from "@/lib/shape-drag"
 import {
   DEFAULT_EDGE_COLOR,
@@ -27,14 +28,12 @@ import {
   type CanvasNode,
   type NodeShape,
 } from "@/types/canvas"
+import { FIT_VIEW_DELAY_MS, AI_SIDEBAR_MINIMAP_OFFSET } from "@/constants"
 
 interface CanvasFlowProps {
   isAiSidebarOpen?: boolean
+  pendingTemplate?: PendingTemplateImport | null
 }
-
-// AI sidebar is `w-80` (320px), floated as an absolute overlay over the canvas — bump the
-// MiniMap's right offset by that width plus a gap so the sidebar doesn't cover it.
-const AI_SIDEBAR_MINIMAP_OFFSET = "336px"
 
 const nodeTypes = { canvasNode: CanvasNodeRenderer }
 const edgeTypes = { canvasEdge: CanvasEdgeRenderer }
@@ -52,7 +51,7 @@ function generateNodeId(shape: NodeShape): string {
   return `${shape}-${Date.now()}-${nodeIdCounter}`
 }
 
-export function CanvasFlow({ isAiSidebarOpen }: CanvasFlowProps) {
+export function CanvasFlow({ isAiSidebarOpen, pendingTemplate }: CanvasFlowProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } = useLiveblocksFlow<
     CanvasNode,
     CanvasEdge
@@ -63,6 +62,40 @@ export function CanvasFlow({ isAiSidebarOpen }: CanvasFlowProps) {
   })
 
   const reactFlowInstanceRef = useRef<ReactFlowInstance<CanvasNode, CanvasEdge> | null>(null)
+  const appliedTemplateRequestIdRef = useRef<number | null>(null)
+
+  // Latest-value refs so the template-import effect below doesn't need `nodes`/`edges`
+  // in its dependency array — depending on them directly would re-run (and cancel the
+  // pending fitView timeout via cleanup) the moment the import's own dispatch updates
+  // them, right before the timeout could fire. Refs must be written in an effect, not
+  // during render (react-hooks/refs).
+  const nodesRef = useRef(nodes)
+  const edgesRef = useRef(edges)
+  useEffect(() => {
+    nodesRef.current = nodes
+    edgesRef.current = edges
+  }, [nodes, edges])
+
+  useEffect(() => {
+    if (!pendingTemplate || pendingTemplate.requestId === appliedTemplateRequestIdRef.current) {
+      return
+    }
+    appliedTemplateRequestIdRef.current = pendingTemplate.requestId
+
+    onNodesChange([
+      ...nodesRef.current.map((node) => ({ type: "remove" as const, id: node.id })),
+      ...pendingTemplate.template.nodes.map((item) => ({ type: "add" as const, item })),
+    ])
+    onEdgesChange([
+      ...edgesRef.current.map((edge) => ({ type: "remove" as const, id: edge.id })),
+      ...pendingTemplate.template.edges.map((item) => ({ type: "add" as const, item })),
+    ])
+
+    const timeoutId = setTimeout(() => {
+      reactFlowInstanceRef.current?.fitView({ duration: 200 })
+    }, FIT_VIEW_DELAY_MS)
+    return () => clearTimeout(timeoutId)
+  }, [pendingTemplate, onNodesChange, onEdgesChange])
 
   const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
     if (!event.dataTransfer.types.includes(SHAPE_DRAG_MIME_TYPE)) {

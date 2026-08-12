@@ -4,8 +4,7 @@ import { useState, type KeyboardEvent, type MouseEvent } from "react"
 import { EdgeLabelRenderer, getSmoothStepPath, useReactFlow, type EdgeProps } from "@xyflow/react"
 
 import { DEFAULT_EDGE_COLOR, type CanvasEdge } from "@/types/canvas"
-
-const REST_OPACITY = 0.55
+import { REST_OPACITY } from "@/constants"
 
 export function CanvasEdgeRenderer({
   id,

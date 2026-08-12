@@ -8,6 +8,8 @@ import { EditorNavbar } from "@/components/editor-navbar"
 import { ProjectDialog } from "@/components/project-dialog"
 import { ProjectSidebar } from "@/components/sidebar"
 import { ShareDialog } from "@/components/share-dialog"
+import { StarterTemplatesModal } from "@/components/starter-templates-modal"
+import type { CanvasTemplate, PendingTemplateImport } from "@/components/starter-templates"
 import { useProjectActions } from "@/hooks/use-project-actions"
 import { useShareDialog } from "@/hooks/use-share-dialog"
 import type { Project } from "@/types/project"
@@ -25,6 +27,8 @@ export function WorkspaceShell({
 }: WorkspaceShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isAiSidebarOpen, setIsAiSidebarOpen] = useState(false)
+  const [isTemplatesModalOpen, setIsTemplatesModalOpen] = useState(false)
+  const [pendingTemplate, setPendingTemplate] = useState<PendingTemplateImport | null>(null)
   const {
     activeDialog,
     targetProject,
@@ -57,6 +61,10 @@ export function WorkspaceShell({
     copyLink,
   } = useShareDialog(project.id)
 
+  function handleImportTemplate(template: CanvasTemplate) {
+    setPendingTemplate({ template, requestId: Date.now() })
+  }
+
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-base">
       <EditorNavbar
@@ -67,6 +75,7 @@ export function WorkspaceShell({
         isAiSidebarOpen={isAiSidebarOpen}
         onToggleAiSidebar={() => setIsAiSidebarOpen((open) => !open)}
         onShare={openShareDialog}
+        onOpenTemplates={() => setIsTemplatesModalOpen(true)}
       />
 
       <div className="relative flex flex-1 overflow-hidden">
@@ -82,7 +91,11 @@ export function WorkspaceShell({
         />
 
         <main className="flex-1 overflow-hidden">
-          <Canvas roomId={project.id} isAiSidebarOpen={isAiSidebarOpen} />
+          <Canvas
+            roomId={project.id}
+            isAiSidebarOpen={isAiSidebarOpen}
+            pendingTemplate={pendingTemplate}
+          />
         </main>
 
         <AiSidebarPlaceholder
@@ -119,6 +132,12 @@ export function WorkspaceShell({
         onInvite={invite}
         onRemove={remove}
         onCopyLink={copyLink}
+      />
+
+      <StarterTemplatesModal
+        open={isTemplatesModalOpen}
+        onOpenChange={setIsTemplatesModalOpen}
+        onImport={handleImportTemplate}
       />
     </div>
   )

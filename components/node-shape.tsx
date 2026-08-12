@@ -4,6 +4,7 @@ import type { ChangeEvent, KeyboardEvent, MouseEvent } from "react"
 
 import { cn } from "@/lib/utils"
 import type { NodeShape } from "@/types/canvas"
+import { CSS_SHAPE_RADIUS, SELECTED_STROKE, REST_STROKE } from "@/constants"
 
 interface NodeShapeVisualProps {
   shape: NodeShape
@@ -19,15 +20,6 @@ interface NodeShapeVisualProps {
   onLabelChange?: (event: ChangeEvent<HTMLTextAreaElement>) => void
   onLabelBlur?: () => void
   onLabelKeyDown?: (event: KeyboardEvent<HTMLTextAreaElement>) => void
-}
-
-const REST_STROKE = "var(--border-default)"
-const SELECTED_STROKE = "var(--accent-primary)"
-
-const CSS_SHAPE_RADIUS: Record<"rectangle" | "pill" | "circle", string> = {
-  rectangle: "rounded-xl",
-  pill: "rounded-full",
-  circle: "rounded-full",
 }
 
 // diamond, hexagon, and cylinder render as SVG since CSS borders can't
