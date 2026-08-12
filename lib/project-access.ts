@@ -8,6 +8,8 @@ import type { Project, ProjectCollaborator } from "@/app/generated/prisma/client
 export interface ClerkIdentity {
   userId: string
   email: string | null
+  name: string | null
+  avatarUrl: string | null
 }
 
 export async function getCurrentIdentity(): Promise<ClerkIdentity | null> {
@@ -18,8 +20,10 @@ export async function getCurrentIdentity(): Promise<ClerkIdentity | null> {
 
   const user = await currentUser()
   const email = user?.primaryEmailAddress?.emailAddress ?? null
+  const name = user?.fullName ?? user?.username ?? null
+  const avatarUrl = user?.imageUrl ?? null
 
-  return { userId, email }
+  return { userId, email, name, avatarUrl }
 }
 
 export function hasProjectAccess(

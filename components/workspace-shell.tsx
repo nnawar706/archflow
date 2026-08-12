@@ -3,7 +3,7 @@
 import { useState } from "react"
 
 import { AiSidebarPlaceholder } from "@/components/ai-sidebar-placeholder"
-import { CanvasPlaceholder } from "@/components/canvas-placeholder"
+import { Canvas } from "@/components/canvas"
 import { EditorNavbar } from "@/components/editor-navbar"
 import { ProjectDialog } from "@/components/project-dialog"
 import { ProjectSidebar } from "@/components/sidebar"
@@ -82,7 +82,7 @@ export function WorkspaceShell({
         />
 
         <main className="flex-1 overflow-hidden">
-          <CanvasPlaceholder />
+          <Canvas roomId={project.id} isAiSidebarOpen={isAiSidebarOpen} />
         </main>
 
         <AiSidebarPlaceholder
