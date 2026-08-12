@@ -17,8 +17,11 @@ import {
 import { CanvasControls } from "@/components/canvas-controls"
 import { CanvasEdgeRenderer } from "@/components/canvas-edge"
 import { CanvasNodeRenderer } from "@/components/canvas-node"
+import { PresenceAvatars } from "@/components/presence-avatars"
+import { PresenceCursors } from "@/components/presence-cursors"
 import { ShapePanel } from "@/components/shape-panel"
 import type { PendingTemplateImport } from "@/components/starter-templates"
+import { useCanvasAutosave, type SaveStatus } from "@/hooks/use-canvas-autosave"
 import { SHAPE_DRAG_MIME_TYPE, parseShapeDragPayload } from "@/lib/shape-drag"
 import {
   DEFAULT_EDGE_COLOR,
@@ -31,8 +34,12 @@ import {
 import { FIT_VIEW_DELAY_MS, AI_SIDEBAR_MINIMAP_OFFSET } from "@/constants"
 
 interface CanvasFlowProps {
+  projectId: string
   isAiSidebarOpen?: boolean
   pendingTemplate?: PendingTemplateImport | null
+  onSaveStatusChange?: (status: SaveStatus) => void
+  autosaveEnabled: boolean
+  manualSaveRequestId?: number | null
 }
 
 const nodeTypes = { canvasNode: CanvasNodeRenderer }
@@ -51,7 +58,14 @@ function generateNodeId(shape: NodeShape): string {
   return `${shape}-${Date.now()}-${nodeIdCounter}`
 }
 
-export function CanvasFlow({ isAiSidebarOpen, pendingTemplate }: CanvasFlowProps) {
+export function CanvasFlow({
+  projectId,
+  isAiSidebarOpen,
+  pendingTemplate,
+  onSaveStatusChange,
+  autosaveEnabled,
+  manualSaveRequestId,
+}: CanvasFlowProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onDelete } = useLiveblocksFlow<
     CanvasNode,
     CanvasEdge
@@ -61,8 +75,51 @@ export function CanvasFlow({ isAiSidebarOpen, pendingTemplate }: CanvasFlowProps
     edges: { initial: [] },
   })
 
+  useCanvasAutosave({
+    projectId,
+    nodes,
+    edges,
+    enabled: autosaveEnabled,
+    manualSaveRequestId,
+    onStatusChange: onSaveStatusChange,
+  })
+
   const reactFlowInstanceRef = useRef<ReactFlowInstance<CanvasNode, CanvasEdge> | null>(null)
   const appliedTemplateRequestIdRef = useRef<number | null>(null)
+  const hasCheckedSavedCanvasRef = useRef(false)
+
+  // On first mount only: if the room is empty (a fresh room, or one whose
+  // storage hasn't been populated yet) and the project has a previously
+  // saved canvas, load it in. A room that already has nodes/edges is active
+  // collaboration state and must never be overwritten by a stale save.
+  useEffect(() => {
+    if (hasCheckedSavedCanvasRef.current) {
+      return
+    }
+    hasCheckedSavedCanvasRef.current = true
+
+    if (nodes.length > 0 || edges.length > 0) {
+      return
+    }
+
+    async function loadSavedCanvas() {
+      const response = await fetch(`/api/projects/${projectId}/canvas`)
+      if (!response.ok) {
+        return
+      }
+
+      const snapshot = (await response.json()) as { nodes: CanvasNode[]; edges: CanvasEdge[] }
+      if (snapshot.nodes.length === 0 && snapshot.edges.length === 0) {
+        return
+      }
+
+      onNodesChange(snapshot.nodes.map((item) => ({ type: "add" as const, item })))
+      onEdgesChange(snapshot.edges.map((item) => ({ type: "add" as const, item })))
+    }
+
+    void loadSavedCanvas()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once on mount, reads latest nodes/edges via refs
+  }, [])
 
   // Latest-value refs so the template-import effect below doesn't need `nodes`/`edges`
   // in its dependency array — depending on them directly would re-run (and cancel the
@@ -184,6 +241,10 @@ export function CanvasFlow({ isAiSidebarOpen, pendingTemplate }: CanvasFlowProps
       <Panel position="bottom-center">
         <ShapePanel />
       </Panel>
+      <Panel position="top-right">
+        <PresenceAvatars />
+      </Panel>
+      <PresenceCursors />
     </ReactFlow>
   )
 }

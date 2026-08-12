@@ -3,7 +3,7 @@ declare global {
     // Each user's Presence, for useMyPresence, useOthers, etc.
     Presence: {
       cursor: { x: number; y: number } | null
-      isThinking: boolean
+      thinking: boolean
     }
 
     UserMeta: {

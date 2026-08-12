@@ -2,6 +2,7 @@
 
 import { Pencil, Plus, Trash2, X } from "lucide-react"
 import Link from "next/link"
+import type { MouseEvent } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -17,6 +18,10 @@ interface ProjectSidebarProps {
   onCreate: () => void
   onRename: (project: Project) => void
   onDelete: (project: Project) => void
+  /** True while the active room has changes that autosave hasn't persisted — gates row navigation behind a confirmation. */
+  hasUnsavedChanges?: boolean
+  /** Called instead of following a project row's link directly when `hasUnsavedChanges` is true. */
+  onNavigateAway?: (href: string) => void
 }
 
 function EmptyPlaceholder({ label }: { label: string }) {
@@ -33,13 +38,32 @@ function ProjectRow({
   isActive,
   onRename,
   onDelete,
+  hasUnsavedChanges,
+  onNavigateAway,
 }: {
   project: Project
   canManage: boolean
   isActive: boolean
   onRename: (project: Project) => void
   onDelete: (project: Project) => void
+  hasUnsavedChanges?: boolean
+  onNavigateAway?: (href: string) => void
 }) {
+  const href = `/editor/${project.id}`
+
+  function handleClick(event: MouseEvent<HTMLAnchorElement>) {
+    if (!hasUnsavedChanges || !onNavigateAway) {
+      return
+    }
+    // Let modified/middle clicks (open in new tab, etc.) behave normally —
+    // the current tab's unsaved canvas isn't at risk from those.
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+      return
+    }
+    event.preventDefault()
+    onNavigateAway(href)
+  }
+
   return (
     <div
       className={cn(
@@ -48,7 +72,8 @@ function ProjectRow({
       )}
     >
       <Link
-        href={`/editor/${project.id}`}
+        href={href}
+        onClick={handleClick}
         className={cn(
           "flex min-w-0 flex-1 items-center gap-2 truncate text-sm",
           isActive ? "text-brand" : "text-copy-primary"
@@ -91,6 +116,8 @@ function ProjectList({
   activeProjectId,
   onRename,
   onDelete,
+  hasUnsavedChanges,
+  onNavigateAway,
 }: {
   projects: Project[]
   emptyLabel: string
@@ -98,6 +125,8 @@ function ProjectList({
   activeProjectId?: string
   onRename: (project: Project) => void
   onDelete: (project: Project) => void
+  hasUnsavedChanges?: boolean
+  onNavigateAway?: (href: string) => void
 }) {
   if (projects.length === 0) {
     return <EmptyPlaceholder label={emptyLabel} />
@@ -113,6 +142,8 @@ function ProjectList({
           isActive={project.id === activeProjectId}
           onRename={onRename}
           onDelete={onDelete}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onNavigateAway={onNavigateAway}
         />
       ))}
     </div>
@@ -128,6 +159,8 @@ export function ProjectSidebar({
   onCreate,
   onRename,
   onDelete,
+  hasUnsavedChanges,
+  onNavigateAway,
 }: ProjectSidebarProps) {
   return (
     <>
@@ -179,6 +212,8 @@ export function ProjectSidebar({
               activeProjectId={activeProjectId}
               onRename={onRename}
               onDelete={onDelete}
+              hasUnsavedChanges={hasUnsavedChanges}
+              onNavigateAway={onNavigateAway}
             />
           </TabsContent>
 
@@ -190,6 +225,8 @@ export function ProjectSidebar({
               activeProjectId={activeProjectId}
               onRename={onRename}
               onDelete={onDelete}
+              hasUnsavedChanges={hasUnsavedChanges}
+              onNavigateAway={onNavigateAway}
             />
           </TabsContent>
         </Tabs>

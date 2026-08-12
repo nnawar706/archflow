@@ -6,22 +6,42 @@ import { ErrorBoundary } from "react-error-boundary"
 
 import { CanvasFlow } from "@/components/canvas-flow"
 import type { PendingTemplateImport } from "@/components/starter-templates"
+import type { SaveStatus } from "@/hooks/use-canvas-autosave"
 
 import "@xyflow/react/dist/style.css"
+import "@liveblocks/react-ui/styles.css"
+import "@liveblocks/react-flow/styles.css"
 
 interface CanvasProps {
   roomId: string
   isAiSidebarOpen?: boolean
   pendingTemplate?: PendingTemplateImport | null
+  onSaveStatusChange?: (status: SaveStatus) => void
+  autosaveEnabled: boolean
+  manualSaveRequestId?: number | null
 }
 
-export function Canvas({ roomId, isAiSidebarOpen, pendingTemplate }: CanvasProps) {
+export function Canvas({
+  roomId,
+  isAiSidebarOpen,
+  pendingTemplate,
+  onSaveStatusChange,
+  autosaveEnabled,
+  manualSaveRequestId,
+}: CanvasProps) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
-      <RoomProvider id={roomId} initialPresence={{ cursor: null, isThinking: false }}>
+      <RoomProvider id={roomId} initialPresence={{ cursor: null, thinking: false }}>
         <ErrorBoundary fallback={<CanvasErrorFallback />}>
           <ClientSideSuspense fallback={<CanvasLoadingFallback />}>
-            <CanvasFlow isAiSidebarOpen={isAiSidebarOpen} pendingTemplate={pendingTemplate} />
+            <CanvasFlow
+              projectId={roomId}
+              isAiSidebarOpen={isAiSidebarOpen}
+              pendingTemplate={pendingTemplate}
+              onSaveStatusChange={onSaveStatusChange}
+              autosaveEnabled={autosaveEnabled}
+              manualSaveRequestId={manualSaveRequestId}
+            />
           </ClientSideSuspense>
         </ErrorBoundary>
       </RoomProvider>

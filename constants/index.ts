@@ -53,3 +53,12 @@ export const EDGE_STROKE_WIDTH = 3
 export const BOUNDS_PADDING = 24
 export const REST_STROKE = "var(--border-default)"
 export const SELECTED_STROKE = "var(--accent-primary)"
+
+// Waits for a pause in canvas edits before saving, so autosave doesn't fire
+// a network request on every single node drag/keystroke.
+export const AUTOSAVE_DEBOUNCE_MS = 1500
+
+export const MAX_VISIBLE_AVATARS = 5
+// Shared between the collaborator avatar stack and the Clerk UserButton override
+// so both stay the same size, per ui-context.md's presence group requirement.
+export const AVATAR_SIZE_CLASS = "size-8"

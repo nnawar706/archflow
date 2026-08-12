@@ -1,9 +1,24 @@
 "use client"
 
 import { UserButton } from "@clerk/nextjs"
-import { LayoutTemplate, PanelLeftClose, PanelLeftOpen, Share2, Sparkles } from "lucide-react"
+import {
+  AlertTriangle,
+  Check,
+  Cloud,
+  CloudOff,
+  LayoutTemplate,
+  Loader2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Save,
+  Share2,
+  Sparkles,
+  Zap,
+  ZapOff,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import type { SaveStatus } from "@/hooks/use-canvas-autosave"
 
 interface EditorNavbarProps {
   isSidebarOpen: boolean
@@ -14,6 +29,21 @@ interface EditorNavbarProps {
   onToggleAiSidebar?: () => void
   onShare?: () => void
   onOpenTemplates?: () => void
+  saveStatus?: SaveStatus
+  autosaveEnabled?: boolean
+  onToggleAutosave?: () => void
+  onManualSave?: () => void
+}
+
+const SAVE_STATUS_CONFIG: Record<
+  SaveStatus,
+  { icon: typeof Cloud; label: string; className: string }
+> = {
+  idle: { icon: Cloud, label: "Saved", className: "text-copy-muted" },
+  saving: { icon: Loader2, label: "Saving…", className: "text-copy-muted" },
+  saved: { icon: Check, label: "Saved", className: "text-success" },
+  unsaved: { icon: CloudOff, label: "Unsaved changes", className: "text-warning" },
+  error: { icon: AlertTriangle, label: "Error saving", className: "text-error" },
 }
 
 export function EditorNavbar({
@@ -25,7 +55,13 @@ export function EditorNavbar({
   onToggleAiSidebar,
   onShare,
   onOpenTemplates,
+  saveStatus = "idle",
+  autosaveEnabled = true,
+  onToggleAutosave,
+  onManualSave,
 }: EditorNavbarProps) {
+  const { icon: SaveStatusIcon, label: saveStatusLabel, className: saveStatusClassName } =
+    SAVE_STATUS_CONFIG[saveStatus]
   return (
     <header className="flex h-14 w-full shrink-0 items-center gap-3 border-b border-surface-border bg-surface px-3">
       <div className="flex min-w-0 max-w-[60%] items-center gap-2">
@@ -54,6 +90,44 @@ export function EditorNavbar({
       <div className="flex items-center gap-2">
         {showWorkspaceActions ? (
           <>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled
+              className={`gap-1.5 ${saveStatusClassName}`}
+              aria-label={saveStatusLabel}
+            >
+              <SaveStatusIcon
+                className={`size-4 ${saveStatus === "saving" ? "animate-spin" : ""}`}
+              />
+              {saveStatusLabel}
+            </Button>
+            {!autosaveEnabled ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onManualSave}
+                disabled={saveStatus === "saving"}
+                aria-label="Save canvas now"
+              >
+                <Save className="size-4" />
+                Save
+              </Button>
+            ) : null}
+            <Button
+              variant={autosaveEnabled ? "secondary" : "outline"}
+              size="sm"
+              onClick={onToggleAutosave}
+              aria-pressed={autosaveEnabled}
+              aria-label={autosaveEnabled ? "Turn autosave off" : "Turn autosave on"}
+            >
+              {autosaveEnabled ? (
+                <Zap className="size-4" />
+              ) : (
+                <ZapOff className="size-4" />
+              )}
+              Autosave
+            </Button>
             <Button
               variant="outline"
               size="sm"
